@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.6'
 services:
   db:
     container_name: ilios_mysql
@@ -14,7 +14,5 @@ services:
       - ILIOS_API_ENVIRONMENT=dev
       - ILIOS_API_DEBUG=true
       - ILIOS_DATABASE_HOST=db
-    expose:
-      - "9000"
     volumes:
       - ./:/var/www/ilios:delegated
