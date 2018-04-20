@@ -69,6 +69,8 @@ RUN apt-get update \
     && docker-php-ext-install pdo_mysql \
     && mv /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/ \
     && mv /etc/apache2/mods-available/socache_shmcb.load /etc/apache2/mods-enabled/ \
+    && mv /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/ \
+    && mv /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/ \
     && rm -rf /var/lib/apt/lists/* \
     && pecl channel-update pecl.php.net \
     && pecl install apcu \
