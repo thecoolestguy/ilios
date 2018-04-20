@@ -1,4 +1,17 @@
-# Begin with the official Composer image and name it 'composer' for reference
+# Begin with the official Git image and name it 'git' for reference
+FROM alpine/git AS git
+# Set the version of Ilios to checkout. Options are 'latest', 'HEAD', or a specific release tag (eg, 'v3.47.0')
+# The ILIOS_VERSION can also be set at build time by setting the '--build-arg "ILIOS_VERSION=vX.XX"' flag
+ARG ILIOS_VERSION=latest
+ENV ILIOS_VERSION=${ILIOS_VERSION}
+RUN \
+    git clone https://github.com/ilios/ilios.git /ilios \
+    && cd /ilios \
+    && git fetch --tags \
+    && if [ "$ILIOS_VERSION" = "latest" ] ; then git checkout tags/$(git describe --tags `git rev-list --tags --max-count=1`) ; fi \
+    && if [ "$ILIOS_VERSION" != "latest" ] && [ "$ILIOS_VERSION" != "HEAD" ] ; then git checkout tags/$ILIOS_VERSION ; fi
+
+# Then the official Composer image and name it 'composer' for reference
 FROM composer AS composer
 
 # get the proper 'PHP' image from the official PHP repo at
@@ -6,6 +19,7 @@ FROM php:7.2-apache-stretch
 
 # copy the Composer PHAR from the Composer image into the apache-php image
 COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY --from=git /ilios /var/www/ilios
 
 # Now that all the 'FROM' values are set, set the maintainer
 MAINTAINER Ilios Project Team <support@iliosproject.org>
@@ -55,11 +69,13 @@ ILIOS_ENABLE_TRACKING=false \
 ILIOS_TRACKING_CODE=UA-XXXXXXXX-1
 
 # copy the contents of the current directory to the /var/www/ilios directory
-COPY . /var/www/ilios
+#COPY . /var/www/ilios
+
 
 # get/install all the PHP extensions required for Ilios and delete the source
 # files after install
-RUN apt-get update \
+RUN \
+    apt-get update \
     && apt-get install -y \
     && apt-get install libldap2-dev -y \
     && apt-get install zlib1g-dev \
@@ -67,6 +83,7 @@ RUN apt-get update \
     && docker-php-ext-install ldap \
     && docker-php-ext-install zip \
     && docker-php-ext-install pdo_mysql \
+    # enable mod_rewrite
     && mv /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/ \
     && mv /etc/apache2/mods-available/socache_shmcb.load /etc/apache2/mods-enabled/ \
     # set up the mpm prefork module
