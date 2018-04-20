@@ -69,8 +69,14 @@ RUN apt-get update \
     && docker-php-ext-install pdo_mysql \
     && mv /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/ \
     && mv /etc/apache2/mods-available/socache_shmcb.load /etc/apache2/mods-enabled/ \
-    && mv /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/ \
-    && mv /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/ \
+    # set up the mpm prefork module
+    && mv /etc/apache2/mods-available/mpm_prefork.* /etc/apache2/mods-enabled/ \
+    && sed -i -e 's|StartServers.*$|StartServers\t\t4|g' /etc/apache2/mods-enabled/mpm_prefork.conf \
+    && sed -i -e 's|MinSpareServers.*$|MinSpareServers\t20|g' /etc/apache2/mods-enabled/mpm_prefork.conf \
+    && sed -i -e 's|MaxSpareServers.*$|MaxSpareServers\t40|g' /etc/apache2/mods-enabled/mpm_prefork.conf \
+    && sed -i -e 's|MaxRequestWorkers.*$|MaxRequestWorkers\t200|g' /etc/apache2/mods-enabled/mpm_prefork.conf \
+    && sed -i -e 's|MaxConnectionsPerChild.*$|MaxConnectionsPerChild\t4500|g' /etc/apache2/mods-enabled/mpm_prefork.conf \
+    # remove the apt source files to save space
     && rm -rf /var/lib/apt/lists/* \
     && pecl channel-update pecl.php.net \
     && pecl install apcu \
