@@ -2768,25 +2768,25 @@
         },
         {
             "name": "ilios/mesh-parser",
-            "version": "v2.0.1",
+            "version": "v2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ilios/mesh-parser.git",
-                "reference": "387df63c6d4c6703e5dbcf28099f74a1d9c73c3c"
+                "reference": "b72149c11b050a7d77d5f62f8ffd90cac76cdc88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ilios/mesh-parser/zipball/387df63c6d4c6703e5dbcf28099f74a1d9c73c3c",
-                "reference": "387df63c6d4c6703e5dbcf28099f74a1d9c73c3c",
+                "url": "https://api.github.com/repos/ilios/mesh-parser/zipball/b72149c11b050a7d77d5f62f8ffd90cac76cdc88",
+                "reference": "b72149c11b050a7d77d5f62f8ffd90cac76cdc88",
                 "shasum": ""
             },
             "require": {
-                "php": "~7.1|~7.2"
+                "php": ">=7.3"
             },
             "require-dev": {
-                "fzaninotto/faker": "^1.5",
+                "fakerphp/faker": "@stable",
                 "mockery/mockery": "@stable",
-                "phpunit/phpunit": "6.*",
+                "phpunit/phpunit": "@stable",
                 "squizlabs/php_codesniffer": "@stable"
             },
             "type": "library",
@@ -2814,9 +2814,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ilios/mesh-parser/issues",
-                "source": "https://github.com/ilios/mesh-parser/tree/master"
+                "source": "https://github.com/ilios/mesh-parser/tree/v2.0.2"
             },
-            "time": "2019-02-05T19:18:47+00:00"
+            "time": "2021-02-25T19:33:04+00:00"
         },
         {
             "name": "jaybizzle/crawler-detect",
