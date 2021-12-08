@@ -3508,16 +3508,16 @@
         },
         {
             "name": "jaybizzle/crawler-detect",
-            "version": "v1.2.108",
+            "version": "v1.2.110",
             "source": {
                 "type": "git",
                 "url": "https://github.com/JayBizzle/Crawler-Detect.git",
-                "reference": "69a38c09f99ee056e7cca9fe7c8b1952fd62b837"
+                "reference": "f9d63a3581428fd8a3858e161d072f0b9debc26f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JayBizzle/Crawler-Detect/zipball/69a38c09f99ee056e7cca9fe7c8b1952fd62b837",
-                "reference": "69a38c09f99ee056e7cca9fe7c8b1952fd62b837",
+                "url": "https://api.github.com/repos/JayBizzle/Crawler-Detect/zipball/f9d63a3581428fd8a3858e161d072f0b9debc26f",
+                "reference": "f9d63a3581428fd8a3858e161d072f0b9debc26f",
                 "shasum": ""
             },
             "require": {
@@ -3554,9 +3554,9 @@
             ],
             "support": {
                 "issues": "https://github.com/JayBizzle/Crawler-Detect/issues",
-                "source": "https://github.com/JayBizzle/Crawler-Detect/tree/v1.2.108"
+                "source": "https://github.com/JayBizzle/Crawler-Detect/tree/v1.2.110"
             },
-            "time": "2021-10-21T18:55:50+00:00"
+            "time": "2021-12-07T18:35:06+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
