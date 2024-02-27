@@ -87,6 +87,7 @@ ENV PATH="${PATH}:/root/.composer/vendor/bin"
 WORKDIR /srv/app
 RUN /usr/bin/touch .env
 RUN set -eux; \
+    export COMPOSER_ALLOW_SUPERUSER=1; \
     mkdir -p var/cache var/log; \
     composer install --prefer-dist --no-dev --no-progress --no-scripts --no-interaction; \
     composer dump-autoload --classmap-authoritative --no-dev; \
@@ -97,8 +98,8 @@ RUN set -eux; \
     sync
 VOLUME /srv/app/var
 
-ARG ILIOS_VERSION="v0.1.0"
-RUN echo ${ILIOS_VERSION} > VERSION
+#ARG ILIOS_VERSION="v0.1.0"
+#RUN echo ${ILIOS_VERSION} > VERSION
 
 COPY docker/fpm/symfony.prod.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/fpm/ilios.ini $PHP_INI_DIR/conf.d/ilios.ini
@@ -110,8 +111,10 @@ COPY docker/fpm/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 COPY docker/fpm/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
 
-ENTRYPOINT ["docker-entrypoint"]
-CMD ["php-fpm"]
+#ENTRYPOINT ["docker-entrypoint"]
+#CMD ["php-fpm"]
+ENTRYPOINT ["sleep"]
+CMD ["infinity"]
 
 ###############################################################################
 # FPM configured to run ilios

@@ -1,4 +1,5 @@
 #!/bin/sh
+export COMPOSER_ALLOW_SUPERUSER=1
 set -e
 
 # first arg is `-f` or `--some-option`
