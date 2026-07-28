@@ -1,0 +1,149 @@
+name: Redeploy ECS Services
+
+on:
+  push:
+    branches:
+      - daily_deployment
+
+  schedule:
+    # GitHub cron is UTC.
+    # 06:00 UTC is 11:00 PM Pacific during daylight time.
+    - cron: "0 6 * * *"
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: demo
+        type: choice
+        options:
+          - demo
+          - staging
+          - production
+      dry_run:
+        description: "If true, print actions without redeploying"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-demo:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'demo')
+    runs-on: ubuntu-latest
+    environment: demo
+    concurrency:
+      group: ecs-redeploy-demo
+      cancel-in-progress: false
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      ECS_CLUSTERS: ${{ vars.ECS_CLUSTERS }}
+      ECS_SERVICES: ${{ vars.ECS_SERVICES }}
+    steps:
+      - name: Configure AWS credentials
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run == false }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Dry run summary
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Dry run enabled."
+          echo "Environment: demo"
+          echo "Clusters: ${ECS_CLUSTERS}"
+          echo "Services: ${ECS_SERVICES}"
+
+      - name: Redeploy ECS services
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run == false }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          IFS=',' read -r -a clusters <<< "${ECS_CLUSTERS}"
+          IFS=',' read -r -a services <<< "${ECS_SERVICES}"
+
+          for cluster in "${clusters[@]}"; do
+            cluster="$(echo "${cluster}" | xargs)"
+            echo "Redeploying cluster: ${cluster}"
+
+            service_args=()
+            for service in "${services[@]}"; do
+              service="$(echo "${service}" | xargs)"
+              echo "Forcing new deployment for ${cluster}/${service}"
+              aws ecs update-service \
+                --cluster "${cluster}" \
+                --service "${service}" \
+                --force-new-deployment \
+                --no-cli-pager
+              service_args+=("${service}")
+            done
+
+            echo "Waiting for cluster to stabilize: ${cluster}"
+            aws ecs wait services-stable \
+              --cluster "${cluster}" \
+              --services "${service_args[@]}" \
+              --no-cli-pager
+          done
+
+          echo "Dev deployment complete."
+
+  deploy-production:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: ecs-redeploy-production
+      cancel-in-progress: false
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      ECS_CLUSTERS: ${{ vars.ECS_CLUSTERS }}
+      ECS_SERVICES: ${{ vars.ECS_SERVICES }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Redeploy ECS services
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          IFS=',' read -r -a clusters <<< "${ECS_CLUSTERS}"
+          IFS=',' read -r -a services <<< "${ECS_SERVICES}"
+
+          for cluster in "${clusters[@]}"; do
+            cluster="$(echo "${cluster}" | xargs)"
+            echo "Redeploying cluster: ${cluster}"
+
+            service_args=()
+            for service in "${services[@]}"; do
+              service="$(echo "${service}" | xargs)"
+              echo "Forcing new deployment for ${cluster}/${service}"
+              aws ecs update-service \
+                --cluster "${cluster}" \
+                --service "${service}" \
+                --force-new-deployment \
+                --no-cli-pager
+              service_args+=("${service}")
+            done
+
+            echo "Waiting for cluster to stabilize: ${cluster}"
+            aws ecs wait services-stable \
+              --cluster "${cluster}" \
+              --services "${service_args[@]}" \
+              --no-cli-pager
+          done
+
+          echo "Production deployment complete."
